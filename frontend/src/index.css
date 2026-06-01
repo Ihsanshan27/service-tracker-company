@@ -1,0 +1,175 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+@theme {
+  --color-primary-50: #f5f7ff;
+  --color-primary-100: #ebf0ff;
+  --color-primary-200: #d6e0ff;
+  --color-primary-300: #b3c7ff;
+  --color-primary-400: #85a4ff;
+  --color-primary-500: #4f75ff;
+  --color-primary-600: #2b4eff;
+  --color-primary-700: #1536eb;
+  --color-primary-800: #102bb8;
+  --color-primary-900: #132891;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: #f8fafc; /* bg-slate-50 */
+  color: #0f172a; /* text-slate-900 */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Glassmorphism utility classes for premium dashboard UI */
+.glass {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.dark-glass {
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ==========================================================================
+   Dark Mode Styles
+   ========================================================================== */
+
+.dark body {
+  background-color: #0b0f19; /* premium deep slate night */
+  color: #f8fafc;
+}
+
+/* Glass overrides in dark mode */
+.dark .glass {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Sidebar & Header Night elements */
+.dark aside {
+  background-color: #0b0f19 !important;
+  border-color: #1e293b !important;
+}
+
+.dark header {
+  background-color: #0b0f19 !important;
+  border-color: #1e293b !important;
+}
+
+.dark nav a:not(.bg-primary-500) {
+  color: #94a3b8;
+}
+.dark nav a:not(.bg-primary-500):hover {
+  background-color: rgba(30, 41, 59, 0.5);
+  color: #f1f5f9;
+}
+
+/* Card overrides */
+.dark .bg-white {
+  background-color: #131b2e !important;
+  border-color: #1e293b !important;
+}
+
+.dark .bg-slate-50 {
+  background-color: #0b0f19 !important;
+}
+
+/* Text night colors */
+.dark .text-slate-800 {
+  color: #f1f5f9 !important;
+}
+
+.dark .text-slate-700 {
+  color: #e2e8f0 !important;
+}
+
+.dark .text-slate-600 {
+  color: #cbd5e1 !important;
+}
+
+.dark .text-slate-500 {
+  color: #94a3b8 !important;
+}
+
+.dark .text-slate-400 {
+  color: #64748b !important;
+}
+
+/* Borders night colors */
+.dark .border-slate-200 {
+  border-color: #1e293b !important;
+}
+
+.dark .border-slate-100 {
+  border-color: #1e293b !important;
+}
+
+.dark .divide-slate-100 > * + * {
+  border-color: #1e293b !important;
+}
+
+/* Form night inputs */
+.dark input, .dark select, .dark textarea {
+  background-color: #131b2e !important;
+  border-color: #1e293b !important;
+  color: #f1f5f9 !important;
+}
+
+.dark input:focus, .dark select:focus, .dark textarea:focus {
+  border-color: #4f75ff !important;
+  background-color: #0b0f19 !important;
+}
+
+/* Table Night Overrides */
+.dark .bg-slate-50\/75 {
+  background-color: rgba(19, 27, 46, 0.85) !important;
+}
+
+.dark .bg-slate-50\/50 {
+  background-color: rgba(19, 27, 46, 0.5) !important;
+}
+
+.dark tr:hover {
+  background-color: rgba(30, 41, 59, 0.25) !important;
+}
+
+.dark .bg-slate-100 {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+}
+
+.dark .border-red-200, .dark .bg-red-50 {
+  background-color: rgba(220, 38, 38, 0.1) !important;
+  border-color: rgba(220, 38, 38, 0.2) !important;
+}
+
+.dark .border-green-200, .dark .bg-green-50 {
+  background-color: rgba(16, 185, 129, 0.1) !important;
+  border-color: rgba(16, 185, 129, 0.2) !important;
+}

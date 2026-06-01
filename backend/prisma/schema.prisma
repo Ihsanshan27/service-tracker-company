@@ -1,0 +1,283 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  FLEET_MANAGER
+  MECHANIC
+  DRIVER
+  FINANCE
+}
+
+enum VehicleStatus {
+  ACTIVE
+  INACTIVE
+  MAINTENANCE
+  SOLD
+}
+
+enum MaintenanceType {
+  OIL_CHANGE
+  SERVICE
+  TIRE_CHANGE
+  BRAKE_CHECK
+  BATTERY_CHECK
+  GENERAL_CHECK
+  OTHER
+}
+
+enum MaintenanceStatus {
+  UPCOMING
+  DUE_SOON
+  OVERDUE
+  COMPLETED
+}
+
+enum DocumentType {
+  STNK
+  TAX
+  INSURANCE
+  KIR
+  OTHER
+}
+
+enum ExpenseType {
+  FUEL
+  SERVICE
+  SPAREPART
+  TAX
+  INSURANCE
+  PARKING
+  TOLL
+  OTHER
+}
+
+enum DamagePriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum DamageStatus {
+  REPORTED
+  APPROVED
+  IN_PROGRESS
+  COMPLETED
+  REJECTED
+}
+
+model User {
+  id                    String              @id @default(uuid())
+  name                  String
+  email                 String              @unique
+  password              String
+  role                  UserRole
+  phone                 String?
+  isActive              Boolean             @default(true)
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  
+  odometerLogs          OdometerLog[]
+  expenses              VehicleExpense[]
+  assignments           DriverAssignment[]
+  reportedDamages       DamageReport[]      @relation("ReportedByUser")
+  assignedDamages       DamageReport[]      @relation("AssignedMechanicUser")
+  performedMaintenances MaintenanceHistory[]
+  comments              VehicleComment[]
+  auditLogs             AuditLog[]
+}
+
+model Vehicle {
+  id              String               @id @default(uuid())
+  plateNumber     String               @unique // plateNumber / nomor polisi
+  brand           String               // brand / merk
+  model           String
+  year            Int
+  color           String
+  vehicleType     String
+  fuelType        String
+  transmission    String
+  chassisNumber   String               // nomor rangka
+  engineNumber    String               // nomor mesin
+  currentOdometer Int
+  status          VehicleStatus        @default(ACTIVE)
+  purchaseDate    DateTime
+  notes           String?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  odometerLogs         OdometerLog[]
+  maintenanceSchedules MaintenanceSchedule[]
+  maintenanceHistories MaintenanceHistory[]
+  documents            VehicleDocument[]
+  expenses             VehicleExpense[]
+  assignments          DriverAssignment[]
+  damageReports        DamageReport[]
+  comments             VehicleComment[]
+}
+
+model OdometerLog {
+  id        String   @id @default(uuid())
+  vehicleId String
+  userId    String
+  odometer  Int
+  date      DateTime
+  notes     String?
+  createdAt DateTime @default(now())
+
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model MaintenanceSchedule {
+  id                  String            @id @default(uuid())
+  vehicleId           String
+  title               String
+  description         String?
+  maintenanceType     MaintenanceType
+  intervalKm          Int?
+  intervalMonth       Int?
+  lastServiceDate     DateTime?
+  lastServiceOdometer Int?
+  nextServiceDate     DateTime?
+  nextServiceOdometer Int?
+  status              MaintenanceStatus @default(UPCOMING)
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  vehicle             Vehicle              @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  maintenanceHistories MaintenanceHistory[]
+}
+
+model MaintenanceHistory {
+  id                 String          @id @default(uuid())
+  vehicleId          String
+  scheduleId         String?
+  performedBy        String?         // Mechanic ID
+  maintenanceType    MaintenanceType
+  title              String
+  description        String?
+  serviceDate        DateTime
+  odometerAtService  Int
+  workshopName       String
+  cost               Float
+  status             String          @default("COMPLETED") // COMPLETED, CANCELLED
+  notes              String?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  vehicle  Vehicle              @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  schedule MaintenanceSchedule? @relation(fields: [scheduleId], references: [id], onDelete: SetNull)
+  mechanic User?                @relation(fields: [performedBy], references: [id], onDelete: SetNull)
+}
+
+model VehicleDocument {
+  id             String       @id @default(uuid())
+  vehicleId      String
+  documentType   DocumentType
+  documentNumber String
+  issueDate      DateTime
+  expiryDate     DateTime
+  provider       String?
+  cost           Float?
+  documentUrl    String?      // Optional for STNK/KIR file upload
+  notes          String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+}
+
+model VehicleExpense {
+  id          String      @id @default(uuid())
+  vehicleId   String
+  expenseType ExpenseType
+  title       String
+  description String?
+  amount      Float
+  expenseDate DateTime
+  odometer    Int?
+  createdBy   String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  creator User    @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+}
+
+model DriverAssignment {
+  id        String   @id @default(uuid())
+  vehicleId String
+  driverId  String
+  startDate DateTime
+  endDate   DateTime?
+  status    String   @default("ACTIVE") // ACTIVE, ENDED
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  driver  User    @relation(fields: [driverId], references: [id], onDelete: Cascade)
+}
+
+model DamageReport {
+  id                String         @id @default(uuid())
+  vehicleId         String
+  reportedBy        String
+  assignedMechanic  String?
+  title             String
+  description       String
+  priority          DamagePriority
+  status            DamageStatus   @default(REPORTED)
+  reportDate        DateTime       @default(now())
+  completedDate     DateTime?
+  notes             String?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  vehicle  Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  reporter User    @relation("ReportedByUser", fields: [reportedBy], references: [id], onDelete: Cascade)
+  mechanic User?   @relation("AssignedMechanicUser", fields: [assignedMechanic], references: [id], onDelete: SetNull)
+}
+
+model VehicleComment {
+  id        String   @id @default(uuid())
+  vehicleId String
+  userId    String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String
+  action     String   // CREATE, UPDATE, DELETE, LOGIN
+  entity     String   // Vehicle, User, Document, dll
+  entityId   String?
+  entityName String?  // human-readable name
+  oldValues  Json?
+  newValues  Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SystemSetting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

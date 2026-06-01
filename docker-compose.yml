@@ -1,0 +1,47 @@
+services:
+  database:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: vehicle_tracker
+      POSTGRES_USER: vehicle_tracker
+      POSTGRES_PASSWORD: vehicle_tracker_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vehicle_tracker -d vehicle_tracker"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://vehicle_tracker:vehicle_tracker_password@database:5432/vehicle_tracker
+      JWT_SECRET: vehicle-tracker-secret-key-2026
+      JWT_EXPIRES_IN: 1d
+      PORT: 3000
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:3000
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+
+volumes:
+  postgres_data:

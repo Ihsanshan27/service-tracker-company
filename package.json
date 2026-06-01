@@ -1,0 +1,11 @@
+{
+  "name": "vehicle-tracker-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev:backend": "cd backend && npm run start:dev",
+    "build:backend": "cd backend && npm run build",
+    "seed": "cd backend && npx prisma db seed",
+    "migrate": "cd backend && npx prisma migrate dev"
+  }
+}
